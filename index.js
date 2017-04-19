@@ -60,24 +60,25 @@ class S3Deploy {
       bucketNotifications.forEach((bucket) => {
         //check this buckets notifications and replace the arn with the real one
         bucket.NotificationConfiguration.LambdaFunctionConfigurations.forEach((cfg) => {
-          let deployed = results.functions.find((fn) => fn.deployedName === cfg.LambdaFunctionArn);
+          let deployed = results.functions.find((fn) => fn.deployedName.replace(results.service + "-", "") === cfg.LambdaFunctionArn);
           if (!deployed) {
             throw new Error("It looks like the function has not yet beend deployed. You must use 'sls deploy' before doing 'sls s3deploy.");
           }
           //get the full arn!
-          let output = info.gatheredData.outputs.find((out) => out.OutputValue.indexOf(deployed.deployedName) !== -1);
+          let output = info.gatheredData.outputs.find((out) => out.OutputValue.indexOf(deployed.deployedName.replace(results.service + "-", "")) !== -1);
           let arn = output.OutputValue.replace(/:\d$/, ''); //unless using qualifier?
+          arn = arn.replace(results.service + "-", "")
 
           //replace placeholder ARN with final
           cfg.LambdaFunctionArn = arn;
-          this.serverless.cli.log(`Attaching ${deployed.deployedName} to ${bucket.Bucket} ${cfg.Events}...`);
+          this.serverless.cli.log(`Attaching ${deployed.deployedName.replace(results.service + "-", "")} to ${bucket.Bucket} ${cfg.Events}...`);
 
           //attach the bucket permission to the lambda
           let permConfig = {
             Action: "lambda:InvokeFunction",
-            FunctionName: deployed.deployedName,
+            FunctionName: deployed.deployedName.replace(results.service + "-", ""),
             Principal: 's3.amazonaws.com',
-            StatementId: `${deployed.deployedName}-${bucket.Bucket}`, // TODO hash the entire cfg? in case multiple
+            StatementId: `${deployed.deployedName.replace(results.service + "-", "")}-${bucket.Bucket}`, // TODO hash the entire cfg? in case multiple
             //Qualifier to point at alias or version
             SourceArn: `arn:aws:s3:::${bucket.Bucket}`
           };
