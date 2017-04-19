@@ -165,7 +165,8 @@ class S3Deploy {
         this.functionPolicies[cfg.FunctionName] = policy;
         return policy;
       }, (error) => {
-        return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+        this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+        return null;
       });
     }
     if (policy) {
