@@ -163,24 +163,28 @@ class S3Deploy {
         let policy = JSON.parse(result.Policy);
         this.functionPolicies[cfg.FunctionName] = policy;
         return policy;
+      }, (error) => {
+        return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+      });
+    }
+    if (policy) {
+      return existingPolicyPromise.then((policy) => {
+        //find our id
+        let ourStatement = policy.Statement.find((stmt) => stmt.Sid === cfg.StatementId);
+        if (ourStatement) {
+          //delete the statement before adding a new one
+          return this.provider.request('Lambda', 'removePermission', { FunctionName: cfg.FunctionName, StatementId: cfg.StatementId }, this.providerConfig.stage, this.providerConfig.region);
+        } else {
+          //just resolve
+          return Promise.resolve();
+        }
+      })
+      .then(() => {
+        //put the new policy
+        return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
       });
     }
 
-    return existingPolicyPromise.then((policy) => {
-      //find our id
-      let ourStatement = policy.Statement.find((stmt) => stmt.Sid === cfg.StatementId);
-      if (ourStatement) {
-        //delete the statement before adding a new one
-        return this.provider.request('Lambda', 'removePermission', { FunctionName: cfg.FunctionName, StatementId: cfg.StatementId }, this.providerConfig.stage, this.providerConfig.region);
-      } else {
-        //just resolve
-        return Promise.resolve();
-      }
-    })
-    .then(() => {
-      //put the new policy
-      return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
-    });
   }
 
 }
