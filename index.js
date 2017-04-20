@@ -166,6 +166,8 @@ class S3Deploy {
         this.functionPolicies[cfg.FunctionName] = policy;
         return policy;
       }, (error) => {
+        console.log("catching the fail: ", error);
+        console.log("This is the config we are trying to pass through: ", cfg);
         this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
         return null;
       });
