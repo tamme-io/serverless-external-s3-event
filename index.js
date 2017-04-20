@@ -78,7 +78,7 @@ class S3Deploy {
             Action: "lambda:InvokeFunction",
             FunctionName: deployed.deployedName.replace(results.service + "-", ""),
             Principal: 's3.amazonaws.com',
-            StatementId: `${deployed.deployedName.replace(results.service + "-", "")}-${bucket.Bucket}-${Date.now()}`, // TODO hash the entire cfg? in case multiple
+            StatementId: `${deployed.deployedName.replace(results.service + "-", "")}-${bucket.Bucket}`, // TODO hash the entire cfg? in case multiple
             //Qualifier to point at alias or version
             SourceArn: `arn:aws:s3:::${bucket.Bucket}`
           };
@@ -134,6 +134,7 @@ class S3Deploy {
 
   s3EventApi(cfg) {
     //this is read/modify/put
+    console.log("S3 Event API Config: ", cfg);
     return this.provider.request('S3', 'getBucketNotificationConfiguration', { Bucket: cfg.Bucket }, this.providerConfig.stage, this.providerConfig.region)
     .then((bucketConfig) => {
       //find lambda with our ARN or ID, replace it or add a new one
