@@ -135,6 +135,7 @@ class S3Deploy {
   s3EventApi(cfg) {
     //this is read/modify/put
     console.log("S3 Event API Config: ", cfg);
+    console.log("LambdaFunctionConfigurations: ", cfg.LambdaFunctionConfigurations);
     return this.provider.request('S3', 'getBucketNotificationConfiguration', { Bucket: cfg.Bucket }, this.providerConfig.stage, this.providerConfig.region)
     .then((bucketConfig) => {
       //find lambda with our ARN or ID, replace it or add a new one
