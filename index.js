@@ -206,7 +206,13 @@ class S3Deploy {
       .then(() => {
         //put the new policy
         console.log("adding new permissions: ", cfg);
-        return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+        try {
+          return this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+        } catch (error) {
+          console.log("There was probably already a policy attached to the lambda function: ", error);
+          return null
+        }
+
       });
     }
 
