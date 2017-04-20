@@ -183,7 +183,7 @@ class S3Deploy {
       }
 
     }
-    if (policy) {
+    if (existingPolicyPromise) {
       return existingPolicyPromise.then((policy) => {
         //find our id
         let ourStatement = policy.Statement.find((stmt) => stmt.Sid === cfg.StatementId);
