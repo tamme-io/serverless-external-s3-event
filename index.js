@@ -141,9 +141,9 @@ class S3Deploy {
       //find lambda with our ARN or ID, replace it or add a new one
       cfg.NotificationConfiguration.LambdaFunctionConfigurations.forEach((ourcfg) => {
         console.log("our config: ", ourcfg);
-        let configitems = ourconfig.LambdaFunctionArn.split(":");
+        let configitems = ourcfg.LambdaFunctionArn.split(":");
         configitems.pop();
-        ourconfig.LambdaFunctionArn = configitems.join(":");
+        ourcfg.LambdaFunctionArn = configitems.join(":");
         let currentConfigIndex = bucketConfig.LambdaFunctionConfigurations.findIndex((s3cfg) => ourcfg.LambdaFunctionArn === s3cfg.LambdaFunctionArn || ourcfg.Id === s3cfg.Id);
         if (currentConfigIndex !== -1) {
           //just remove it
