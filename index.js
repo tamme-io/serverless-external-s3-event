@@ -156,12 +156,16 @@ class S3Deploy {
   lambdaPermApi(cfg) {
     //detect existing config with a read call
     //https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#getPolicy-property
+    console.log("Lambda Perm API Being Called");
     var existingPolicyPromise = null;
     if (this.functionPolicies[cfg.FunctionName]) {
+      console.log("There is an existing policy promise");
       existingPolicyPromise = Promise.resolve(this.functionPolicies[cfg.FunctionName]);
     } else {
+      console.log("have to find the existing policy promise");
       existingPolicyPromise = this.provider.request('Lambda', 'getPolicy', { FunctionName: cfg.FunctionName }, this.providerConfig.stage, this.providerConfig.region)
       .then((result) => {
+        console.log("result: ", result);
         let policy = JSON.parse(result.Policy);
         this.functionPolicies[cfg.FunctionName] = policy;
         return policy;
