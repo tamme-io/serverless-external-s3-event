@@ -163,18 +163,25 @@ class S3Deploy {
       existingPolicyPromise = Promise.resolve(this.functionPolicies[cfg.FunctionName]);
     } else {
       console.log("have to find the existing policy promise");
-      existingPolicyPromise = this.provider.request('Lambda', 'getPolicy', { FunctionName: cfg.FunctionName }, this.providerConfig.stage, this.providerConfig.region)
-      .then((result) => {
-        console.log("result: ", result);
-        let policy = JSON.parse(result.Policy);
-        this.functionPolicies[cfg.FunctionName] = policy;
-        return policy;
-      }, (error) => {
-        console.log("catching the fail: ", error);
-        console.log("This is the config we are trying to pass through: ", cfg);
+      try {
+        existingPolicyPromise = this.provider.request('Lambda', 'getPolicy', { FunctionName: cfg.FunctionName }, this.providerConfig.stage, this.providerConfig.region)
+        .then((result) => {
+          console.log("result: ", result);
+          let policy = JSON.parse(result.Policy);
+          this.functionPolicies[cfg.FunctionName] = policy;
+          return policy;
+        }, (error) => {
+          console.log("catching the fail: ", error);
+          console.log("This is the config we are trying to pass through: ", cfg);
+          this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
+          return null;
+        });
+      } catch (error) {
+        console.log("caught in the try catch error: ", error);
         this.provider.request('Lambda', 'addPermission', cfg, this.providerConfig.stage, this.providerConfig.region);
-        return null;
-      });
+        return null
+      }
+
     }
     if (policy) {
       return existingPolicyPromise.then((policy) => {
