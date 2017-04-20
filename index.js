@@ -140,6 +140,7 @@ class S3Deploy {
     .then((bucketConfig) => {
       //find lambda with our ARN or ID, replace it or add a new one
       cfg.NotificationConfiguration.LambdaFunctionConfigurations.forEach((ourcfg) => {
+        console.log("our config: ", ourcfg);
         let currentConfigIndex = bucketConfig.LambdaFunctionConfigurations.findIndex((s3cfg) => ourcfg.LambdaFunctionArn === s3cfg.LambdaFunctionArn || ourcfg.Id === s3cfg.Id);
         if (currentConfigIndex !== -1) {
           //just remove it
@@ -149,8 +150,10 @@ class S3Deploy {
         bucketConfig.LambdaFunctionConfigurations.push(ourcfg);
       });
       debugger;
+      console.log("bucket config: ", bucketConfig);
       return { Bucket: cfg.Bucket, NotificationConfiguration: bucketConfig };
     }).then((cfg) => {
+      console.log("bucket notification config", cfg);
       return this.provider.request('S3', 'putBucketNotificationConfiguration', cfg, this.providerConfig.stage, this.providerConfig.region);
     });
   }
