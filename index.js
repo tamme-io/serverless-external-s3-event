@@ -78,10 +78,11 @@ class S3Deploy {
             Action: "lambda:InvokeFunction",
             FunctionName: deployed.deployedName.replace(results.service + "-", ""),
             Principal: 's3.amazonaws.com',
-            StatementId: `${deployed.deployedName.replace(results.service + "-", "")}-${bucket.Bucket}`, // TODO hash the entire cfg? in case multiple
+            StatementId: `${deployed.deployedName.replace(results.service + "-", "")}-${bucket.Bucket}-${Date.now()}`, // TODO hash the entire cfg? in case multiple
             //Qualifier to point at alias or version
             SourceArn: `arn:aws:s3:::${bucket.Bucket}`
           };
+          console.log('perm config: ', permConfig);
           permsPromises.push(this.lambdaPermApi(permConfig));
         });
 
