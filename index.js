@@ -187,16 +187,21 @@ class S3Deploy {
     if (existingPolicyPromise) {
       return existingPolicyPromise.then((policy) => {
         //find our id
-        console.log("this might be working now?", policy);
-        let ourStatement = policy.Statement.find((stmt) => stmt.Sid === cfg.StatementId);
-        if (ourStatement) {
-          //delete the statement before adding a new one
-          console.log("removing permissions: ", ourStatement);
-          return this.provider.request('Lambda', 'removePermission', { FunctionName: cfg.FunctionName, StatementId: cfg.StatementId }, this.providerConfig.stage, this.providerConfig.region);
+        if (policy) {
+          console.log("this might be working now?", policy);
+          let ourStatement = policy.Statement.find((stmt) => stmt.Sid === cfg.StatementId);
+          if (ourStatement) {
+            //delete the statement before adding a new one
+            console.log("removing permissions: ", ourStatement);
+            return this.provider.request('Lambda', 'removePermission', { FunctionName: cfg.FunctionName, StatementId: cfg.StatementId }, this.providerConfig.stage, this.providerConfig.region);
+          } else {
+            //just resolve
+            return Promise.resolve();
+          }
         } else {
-          //just resolve
           return Promise.resolve();
         }
+
       })
       .then(() => {
         //put the new policy
